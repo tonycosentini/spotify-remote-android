@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Spotify Remote</string>
+  <string name="authorize_account">Authorize Account</string>
+  <string name="error_authorizing_account_title">Error Authorizing</string>
+  <string name="error_authorizing_account_description">Error authorizing your account. Please ensure you have a working internet connection.</string>
+  <string name="logged_in">Logged In</string>
+  <string name="log_out">Log Out</string>
+  <string name="ok">OK</string>
+  <string name="are_you_sure_you_want_to_log_out">Are you sure you want to log out?</string>
+  <string name="yes">Yes</string>
+  <string name="cancel">Cancel</string>
+  <string name="spotify_must_be_running">Spotify must be running to start playlists.</string>
+  <string name="launch_spotify">Launch Spotify</string>
+</resources>

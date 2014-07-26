@@ -1,0 +1,37 @@
+apply plugin: 'com.android.application'
+
+repositories {
+  flatDir {
+    dirs 'libs'
+  }
+}
+android {
+  compileSdkVersion 'android-L'
+  buildToolsVersion "20"
+
+  defaultConfig {
+    applicationId "com.endlesswhileloop.spotifyremote"
+    minSdkVersion 15
+    targetSdkVersion 'L'
+    versionCode 1
+    versionName "1.0"
+  }
+  buildTypes {
+    release {
+      runProguard false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+}
+
+dependencies {
+  compile 'com.squareup.dagger:dagger:1.2.1'
+  provided 'com.squareup.dagger:dagger-compiler:1.2.1'
+
+  compile 'com.jakewharton:butterknife:5.1.1'
+  compile 'com.android.support:recyclerview-v7:+'
+
+  compile project(':core')
+
+  compile(name:'pebblekit-2.4', ext:'aar')
+}
