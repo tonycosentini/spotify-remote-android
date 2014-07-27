@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Spotify Remote</string>
+  <string name="app_name">Playlists Remote</string>
   <string name="authorize_account">Authorize Account</string>
   <string name="error_authorizing_account_title">Error Authorizing</string>
   <string name="error_authorizing_account_description">Error authorizing your account. Please ensure you have a working internet connection.</string>
