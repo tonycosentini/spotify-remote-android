@@ -6,6 +6,7 @@
   <application
     android:name=".base.SpotifyRemoteApplication"
     android:allowBackup="true"
+    android:installLocation="internalOnly"
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name"
     android:theme="@style/AppTheme">
@@ -26,8 +27,15 @@
     </activity>
 
     <service android:name=".SpotifyRemoteService"/>
+
+    <receiver android:name=".StartupReceiver">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
   </application>
 
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>
