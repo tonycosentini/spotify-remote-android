@@ -1,6 +1,7 @@
 package com.endlesswhileloop.spotifyremote.base;
 
 import android.app.Application;
+import com.crashlytics.android.Crashlytics;
 import com.endlesswhileloop.spotifyremote.BuildConfig;
 import dagger.ObjectGraph;
 import timber.log.Timber;
@@ -14,8 +15,8 @@ public class SpotifyRemoteApplication extends Application {
     if (BuildConfig.DEBUG) {
       Timber.plant(new Timber.DebugTree());
     } else {
-      // TODO Crashlytics.start(this);
-      // TODO Timber.plant(new CrashlyticsTree());
+      Crashlytics.start(this);
+      Timber.plant(new CrashlyticsTree());
     }
 
     buildObjectGraphAndInject();

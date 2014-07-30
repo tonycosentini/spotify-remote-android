@@ -36,8 +36,11 @@ public class SpotifyRemoteService extends BaseService {
   private static final int KEY_PLAYLIST_ID = 3;
   private static final int KEY_PLAY_PLAYLIST = 4;
 
+
   private static final int VALUE_MESSAGE_CONNECT = 1;
   private static final int VALUE_MESSAGE_DID_RECEIVE_ALL_PLAYLISTS = 4;
+  private static final int VALUE_MUST_LAUNCH_SPOTIFY = 5;
+  private static final int VALUE_MUST_AUTHORIZE_SPOTIFY = 6;
 
   private static final int TRANSACTION_ID = 1;
 
@@ -69,8 +72,10 @@ public class SpotifyRemoteService extends BaseService {
     PebbleKit.registerReceivedAckHandler(this, new PebbleKit.PebbleAckReceiver(PEBBLE_APP_UUID) {
       @Override
       public void receiveAck(Context context, int transactionId) {
-        mMessagesQueue.remove();
-        sendNextMessage();
+        if (transactionId == TRANSACTION_ID) {
+          mMessagesQueue.remove();
+          sendNextMessage();
+        }
       }
     });
 
@@ -109,14 +114,22 @@ public class SpotifyRemoteService extends BaseService {
   }
 
   private void sendPlaylists() {
-    if (mSpotifyClient.isLoggedIn()) {
+    if (!SpotifyAppUtils.isSpotifyRunning(this)) {
+      PebbleDictionary messageDictionary = new PebbleDictionary();
+      messageDictionary.addInt32(KEY_MESSAGE, VALUE_MUST_LAUNCH_SPOTIFY);
+      mMessagesQueue.add(messageDictionary);
+      sendNextMessage();
+    } else if (mSpotifyClient.isLoggedIn()) {
       mSpotifyClient.getLoggedInUsersPlaylists(new ObserverAdapter<SpotifyPlaylists>() {
         @Override public void onNext(SpotifyPlaylists spotifyPlaylists) {
           sendPlaylistsToPebble(spotifyPlaylists.mItems);
         }
       });
     } else {
-      // Send should login message.
+      PebbleDictionary messageDictionary = new PebbleDictionary();
+      messageDictionary.addInt32(KEY_MESSAGE, VALUE_MUST_AUTHORIZE_SPOTIFY);
+      mMessagesQueue.add(messageDictionary);
+      sendNextMessage();
     }
   }
 

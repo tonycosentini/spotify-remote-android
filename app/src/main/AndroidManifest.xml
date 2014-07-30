@@ -33,6 +33,7 @@
         <action android:name="android.intent.action.BOOT_COMPLETED" />
       </intent-filter>
     </receiver>
+    <meta-data android:name="com.crashlytics.ApiKey" android:value="baa79dcd32a4d7e4058e1eb337583feb554f9c76"/>
   </application>
 
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

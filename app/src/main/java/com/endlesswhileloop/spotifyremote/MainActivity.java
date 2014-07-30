@@ -1,6 +1,5 @@
 package com.endlesswhileloop.spotifyremote;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,8 +23,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import rx.Observer;
 
 public class MainActivity extends BaseActivity {
-  private static final String SPOTIFY_APP_PACKAGE = "com.spotify.music";
-
   @Inject SpotifyClient mSpotifyClient;
 
   @InjectView(R.id.main_progressbar) ProgressBar mProgressBar;
@@ -67,13 +64,13 @@ public class MainActivity extends BaseActivity {
   }
 
   @OnClick(R.id.main_button_launch_spotify) public void onLaunchSpotify() {
-    Intent intent = getPackageManager().getLaunchIntentForPackage(SPOTIFY_APP_PACKAGE);
-    if (intent != null)
-    {
-    /* we found the activity now start the activity */
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      startActivity(intent);
-    }
+    SpotifyAppUtils.launchSpotify(this);
+  }
+
+  @OnClick(R.id.main_button_download_watchapp) public void onDownloadWatchApp() {
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse("pebble://appstore/53d88b3c909b059949000146"));
+    startActivity(i);
   }
 
   private void updateAccountState() {
@@ -82,19 +79,7 @@ public class MainActivity extends BaseActivity {
     boolean loggedIn = mSpotifyClient.isLoggedIn();
     mViewGroupLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
     mViewGroupLoggedOut.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-    mViewGroupSpotifyNotRunning.setVisibility(isSpotifyRunning() ? View.GONE : View.VISIBLE);
-  }
-
-  private boolean isSpotifyRunning() {
-    ActivityManager activityManager = (ActivityManager) this.getSystemService( ACTIVITY_SERVICE );
-    List<ActivityManager.RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
-    for (int i = 0; i < procInfos.size(); i++) {
-      if (procInfos.get(i).processName.equals(SPOTIFY_APP_PACKAGE)) {
-        return true;
-      }
-    }
-
-    return false;
+    mViewGroupSpotifyNotRunning.setVisibility(SpotifyAppUtils.isSpotifyRunning(this) ? View.GONE : View.VISIBLE);
   }
 
   private void showAuthorizationErrorDialog() {
