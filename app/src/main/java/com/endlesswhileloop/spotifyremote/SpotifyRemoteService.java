@@ -36,17 +36,15 @@ public class SpotifyRemoteService extends BaseService {
   private static final int KEY_PLAYLIST_ID = 3;
   private static final int KEY_PLAY_PLAYLIST = 4;
 
-
   private static final int VALUE_MESSAGE_CONNECT = 1;
   private static final int VALUE_MESSAGE_DID_RECEIVE_ALL_PLAYLISTS = 4;
   private static final int VALUE_MUST_LAUNCH_SPOTIFY = 5;
   private static final int VALUE_MUST_AUTHORIZE_SPOTIFY = 6;
 
-  private static final int TRANSACTION_ID = 1;
-
   private Queue<PebbleDictionary> mMessagesQueue = new ArrayQueue<PebbleDictionary>();
 
   private List<SpotifyPlaylist> mPlaylists;
+  private int mCurrentTransactionId = 1;
 
   @Override public int onStartCommand(Intent intent, int flags, int startId) {
     return START_STICKY;
@@ -72,7 +70,8 @@ public class SpotifyRemoteService extends BaseService {
     PebbleKit.registerReceivedAckHandler(this, new PebbleKit.PebbleAckReceiver(PEBBLE_APP_UUID) {
       @Override
       public void receiveAck(Context context, int transactionId) {
-        if (transactionId == TRANSACTION_ID) {
+        boolean queueWasNotCleared = mMessagesQueue.size() != 0;
+        if (queueWasNotCleared) {
           mMessagesQueue.remove();
           sendNextMessage();
         }
@@ -86,10 +85,11 @@ public class SpotifyRemoteService extends BaseService {
       }
     });
 
-
     PebbleKit.registerReceivedDataHandler(this, new PebbleKit.PebbleDataReceiver(PEBBLE_APP_UUID) {
       @Override
       public void receiveData(final Context context, final int transactionId, final PebbleDictionary data) {
+        PebbleKit.sendAckToPebble(context, transactionId);
+
         Timber.d("Received value=" + data.getUnsignedInteger(0) + " for key: 0");
 
         if (data.contains(KEY_MESSAGE)) {
@@ -101,14 +101,12 @@ public class SpotifyRemoteService extends BaseService {
         } else if (data.contains(KEY_PLAY_PLAYLIST)) {
           int playlistIndex = data.getUnsignedInteger(KEY_PLAY_PLAYLIST).intValue();
           Uri playlistUri = Uri.parse(mPlaylists.get(playlistIndex).mUri);
-          Intent i = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH );
+          final Intent i = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH );
           i.setData(playlistUri);
           i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
           startActivity(i);
         }
-
-        PebbleKit.sendAckToPebble(context, transactionId);
       }
     });
   }
@@ -133,8 +131,9 @@ public class SpotifyRemoteService extends BaseService {
     }
   }
 
-  public void sendPlaylistsToPebble(List<SpotifyPlaylist> playlists) {
+  public synchronized void sendPlaylistsToPebble(List<SpotifyPlaylist> playlists) {
     mPlaylists = playlists;
+    mMessagesQueue.clear();
 
     for (SpotifyPlaylist playlist : playlists) {
       PebbleDictionary messageDictionary = new PebbleDictionary();
@@ -153,8 +152,9 @@ public class SpotifyRemoteService extends BaseService {
   private void sendNextMessage() {
     PebbleDictionary dictionary = mMessagesQueue.peek();
     if (dictionary != null) {
-      Timber.d("Sending message to device: " + dictionary.toJsonString());
-      PebbleKit.sendDataToPebbleWithTransactionId(getApplicationContext(), PEBBLE_APP_UUID, dictionary, TRANSACTION_ID);
+      Timber.d("Sending message #" + mCurrentTransactionId + " to device: " + dictionary.toJsonString());
+      PebbleKit.sendDataToPebbleWithTransactionId(getApplicationContext(), PEBBLE_APP_UUID, dictionary, mCurrentTransactionId);
+      mCurrentTransactionId++;
     }
   }
 
