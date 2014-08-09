@@ -18,12 +18,17 @@ import rx.schedulers.Schedulers;
 public class SpotifyClient {
   private static final String REDIRECT_URI = "spotifyremote://received_credentials";
 
-  private SpotifyAccountApi mSpotifyAccountApi;
-  private SpotifyWebApi mSpotifyWebApi;
-  private SpotifyRemotePreferences mSpotifyRemotePreferences;
+  private final String mClientId;
+  private final String mClientSecret;
+  private final SpotifyAccountApi mSpotifyAccountApi;
+  private final SpotifyWebApi mSpotifyWebApi;
+  private final SpotifyRemotePreferences mSpotifyRemotePreferences;
+
   private SpotifyToken mCurrentSpotifyToken;
 
-  public SpotifyClient(SpotifyAccountApi spotifyAccountApi, SpotifyWebApi spotifyWebApi, SpotifyRemotePreferences spotifyRemotePreferences) {
+  public SpotifyClient(String clientId, String clientSecret, SpotifyAccountApi spotifyAccountApi, SpotifyWebApi spotifyWebApi, SpotifyRemotePreferences spotifyRemotePreferences) {
+    mClientId = clientId;
+    mClientSecret = clientSecret;
     mSpotifyAccountApi = spotifyAccountApi;
     mSpotifyWebApi = spotifyWebApi;
     mSpotifyRemotePreferences = spotifyRemotePreferences;
@@ -33,7 +38,7 @@ public class SpotifyClient {
 
   public String getAuthorizationUrl() {
     try {
-      return String.format("https://accounts.spotify.com/authorize/?client_id=%s&response_type=code&redirect_uri=%s&scope=%s", SpotifyAccountApi.SPOTIFY_APP_CLIENT_ID,
+      return String.format("https://accounts.spotify.com/authorize/?client_id=%s&response_type=code&redirect_uri=%s&scope=%s", mClientId,
           URLEncoder.encode(REDIRECT_URI, "UTF-8"), URLEncoder.encode("playlist-read-private user-read-private", "UTF-8"));
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
@@ -45,7 +50,7 @@ public class SpotifyClient {
   }
 
   public void exchangeAuthorizationCode(String authorizationCode, Observer<SpotifyToken> observer) {
-    mSpotifyAccountApi.token("authorization_code", authorizationCode, REDIRECT_URI, SpotifyAccountApi.SPOTIFY_APP_CLIENT_ID, SpotifyAccountApi.SPOTIFY_APP_CLIENT_SECRET)
+    mSpotifyAccountApi.token("authorization_code", authorizationCode, REDIRECT_URI, mClientId, mClientSecret)
         .subscribeOn(Schedulers.io())
         .doOnNext(new Action1<SpotifyToken>() {
           @Override public void call(SpotifyToken spotifyToken) {
@@ -84,7 +89,7 @@ public class SpotifyClient {
         }
       });
     } else {
-      String clientAndSecretBase64 = BaseEncoding.base64().encode((String.format("%s:%s", SpotifyAccountApi.SPOTIFY_APP_CLIENT_ID, SpotifyAccountApi.SPOTIFY_APP_CLIENT_SECRET).getBytes()));
+      String clientAndSecretBase64 = BaseEncoding.base64().encode((String.format("%s:%s", mClientId, mClientSecret).getBytes()));
       String clientAndSecretHeader = String.format("Basic %s", clientAndSecretBase64);
       return mSpotifyAccountApi.refreshToken(clientAndSecretHeader, "refresh_token", mCurrentSpotifyToken.mRefreshToken).doOnNext(new Action1<SpotifyToken>() {
         @Override public void call(SpotifyToken spotifyToken) {

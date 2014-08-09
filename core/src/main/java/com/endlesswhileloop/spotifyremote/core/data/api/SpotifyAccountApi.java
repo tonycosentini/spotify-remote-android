@@ -10,9 +10,6 @@ import rx.Observable;
 public interface SpotifyAccountApi {
   public static final String HOST = "https://accounts.spotify.com";
 
-  public static final String SPOTIFY_APP_CLIENT_ID = "9ec8f42d70674f4c9d3270704e50423e";
-  public static final String SPOTIFY_APP_CLIENT_SECRET = "f373996d107843a193f667130879e78c";
-
   @FormUrlEncoded @POST("/api/token") Observable<SpotifyToken> token(@Field("grant_type") String grantType, @Field("code") String code,
       @Field("redirect_uri") String redirectUri, @Field("client_id") String clientId, @Field("client_secret") String clientSecret);
 
