@@ -33,6 +33,8 @@ public class SpotifyClientTest {
     when(preferences.getSpotifyToken()).thenReturn(spotifyToken);
 
     mSpotifyClient = new SpotifyClient(
+        "dummy client id",
+        "dummy client secret",
         mock(SpotifyAccountApi.class),
         mock(SpotifyWebApi.class),
         preferences

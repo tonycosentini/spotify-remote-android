@@ -16,11 +16,12 @@ import com.endlesswhileloop.spotifyremote.core.data.util.ObserverAdapter;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import dagger.internal.ArrayQueue;
+import timber.log.Timber;
+
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
-import javax.inject.Inject;
-import timber.log.Timber;
 
 public class SpotifyRemoteService extends BaseService {
   @Inject SpotifyClient mSpotifyClient;
@@ -90,7 +91,7 @@ public class SpotifyRemoteService extends BaseService {
       public void receiveData(final Context context, final int transactionId, final PebbleDictionary data) {
         PebbleKit.sendAckToPebble(context, transactionId);
 
-        Timber.d("Received value=" + data.getUnsignedInteger(0) + " for key: 0");
+        Timber.d("Received value=" + data.getUnsignedIntegerAsLong(0) + " for key: 0");
 
         if (data.contains(KEY_MESSAGE)) {
           switch (data.getInteger(KEY_MESSAGE).intValue()) {
@@ -99,7 +100,7 @@ public class SpotifyRemoteService extends BaseService {
               break;
           }
         } else if (data.contains(KEY_PLAY_PLAYLIST)) {
-          int playlistIndex = data.getUnsignedInteger(KEY_PLAY_PLAYLIST).intValue();
+          int playlistIndex = data.getUnsignedIntegerAsLong(KEY_PLAY_PLAYLIST).intValue();
           Uri playlistUri = Uri.parse(mPlaylists.get(playlistIndex).mUri);
           final Intent i = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH );
           i.setData(playlistUri);

@@ -2,6 +2,7 @@ package com.endlesswhileloop.spotifyremote.base;
 
 import android.content.Context;
 import com.endlesswhileloop.spotifyremote.BuildConfig;
+import com.endlesswhileloop.spotifyremote.R;
 import com.endlesswhileloop.spotifyremote.SpotifyRemoteService;
 import com.endlesswhileloop.spotifyremote.core.data.api.SpotifyAccountApi;
 import com.endlesswhileloop.spotifyremote.core.data.api.SpotifyClient;
@@ -49,7 +50,9 @@ public final class SpotifyRemoteModule {
   }
 
   @Provides @Singleton SpotifyClient provideSpotifyApiClient(SpotifyAccountApi spotifyAccountApi, SpotifyWebApi spotifyWebApi, SpotifyRemotePreferences spotifyRemotePreferences) {
-    return new SpotifyClient(spotifyAccountApi, spotifyWebApi, spotifyRemotePreferences);
+    String spotifyClientId = mApplication.getString(R.string.spotify_client_id);
+    String spotifyClientSecret = mApplication.getString(R.string.spotify_client_secret);
+    return new SpotifyClient(spotifyClientId, spotifyClientSecret, spotifyAccountApi, spotifyWebApi, spotifyRemotePreferences);
   }
 
   @Provides Gson provideGson() {
